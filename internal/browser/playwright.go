@@ -1,5 +1,5 @@
 // Package browser wraps Playwright (playwright-go) as the escalation layer for
-// bot walls and captchas. It never imports other dsearch packages.
+// bot walls and captchas. It never imports other loci packages.
 package browser
 
 import (
@@ -15,7 +15,7 @@ import (
 
 	playwright "github.com/mxschmitt/playwright-go"
 
-	"dsearch/internal/config"
+	"loci/internal/config"
 )
 
 // Result is a rendered page.
@@ -34,7 +34,7 @@ type Backend interface {
 }
 
 // ErrUnavailable is returned when the browser layer cannot run.
-var ErrUnavailable = errors.New("browser backend unavailable (run `dsearch browser install`)")
+var ErrUnavailable = errors.New("browser backend unavailable (run `loci browser install`)")
 
 // Playwright implements Backend via playwright-go.
 type Playwright struct {

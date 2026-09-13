@@ -1,4 +1,4 @@
-module dsearch
+module loci
 
 go 1.26.0
 

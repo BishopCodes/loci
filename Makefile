@@ -1,10 +1,10 @@
-BIN  := bin/dsearch
+BIN  := bin/loci
 GO   ?= go
 
 .PHONY: build test vet fmt doctor clean
 
 build:
-	$(GO) build -o $(BIN) ./cmd/dsearch
+	$(GO) build -o $(BIN) ./cmd/loci
 
 test:
 	$(GO) test ./...

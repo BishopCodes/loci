@@ -11,9 +11,9 @@ import (
 	"strings"
 	"testing"
 
-	"dsearch/internal/config"
-	"dsearch/internal/fetch"
-	"dsearch/internal/sanitize"
+	"loci/internal/config"
+	"loci/internal/fetch"
+	"loci/internal/sanitize"
 )
 
 type fakeEmbedder struct{ model string }

@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"dsearch/internal/config"
+	"loci/internal/config"
 )
 
 // domainLimiter is a per-domain token bucket (simple leaky scheduling).

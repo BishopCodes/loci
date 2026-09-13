@@ -11,9 +11,9 @@ import (
 	"strings"
 	"time"
 
-	"dsearch/internal/browser"
-	"dsearch/internal/config"
-	"dsearch/internal/fetch"
+	"loci/internal/browser"
+	"loci/internal/config"
+	"loci/internal/fetch"
 )
 
 // Result is one normalized search hit.

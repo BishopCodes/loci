@@ -12,8 +12,8 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"golang.org/x/net/html"
 
-	"dsearch/internal/extract/htmlmd"
-	"dsearch/internal/fetch"
+	"loci/internal/extract/htmlmd"
+	"loci/internal/fetch"
 )
 
 // Document is the extracted, canonical form ready for chunking.

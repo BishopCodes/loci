@@ -16,15 +16,15 @@ import (
 
 	"golang.org/x/net/publicsuffix"
 
-	"dsearch/internal/browser"
-	"dsearch/internal/chunk"
-	"dsearch/internal/config"
-	"dsearch/internal/embed"
-	"dsearch/internal/extract"
-	"dsearch/internal/fetch"
-	"dsearch/internal/sanitize"
-	"dsearch/internal/search"
-	"dsearch/internal/store"
+	"loci/internal/browser"
+	"loci/internal/chunk"
+	"loci/internal/config"
+	"loci/internal/embed"
+	"loci/internal/extract"
+	"loci/internal/fetch"
+	"loci/internal/sanitize"
+	"loci/internal/search"
+	"loci/internal/store"
 )
 
 // Service is the application facade.
@@ -233,7 +233,7 @@ func (s *Service) vectorize(ctx context.Context, docID int64) error {
 	}
 	m, _, _, _ := s.Store.VectorMeta()
 	if m != "" && m != s.Embedder.Model() {
-		return fmt.Errorf("store has vectors from model %q, configured %q; run `dsearch reindex --vectors`", m, s.Embedder.Model())
+		return fmt.Errorf("store has vectors from model %q, configured %q; run `loci reindex --vectors`", m, s.Embedder.Model())
 	}
 	return s.Store.SaveVectors(s.Embedder.Model(), vecs)
 }

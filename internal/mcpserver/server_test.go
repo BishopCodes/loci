@@ -11,9 +11,9 @@ import (
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
-	"dsearch/internal/config"
-	"dsearch/internal/search"
-	"dsearch/internal/service"
+	"loci/internal/config"
+	"loci/internal/search"
+	"loci/internal/service"
 )
 
 func newTestServer(t *testing.T) (*Server, *httptest.Server) {

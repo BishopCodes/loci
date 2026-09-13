@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"dsearch/internal/config"
+	"loci/internal/config"
 )
 
 // Embedder produces vectors for text batches.
@@ -20,7 +20,7 @@ type Embedder interface {
 	Embed(ctx context.Context, texts []string) ([][]float32, error)
 }
 
-// Probe describes capability for `dsearch doctor`.
+// Probe describes capability for `loci doctor`.
 type Probe struct {
 	Backend string
 	Model   string

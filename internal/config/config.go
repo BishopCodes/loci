@@ -1,4 +1,4 @@
-// Package config loads dsearch configuration from TOML, environment and defaults.
+// Package config loads loci configuration from TOML, environment and defaults.
 package config
 
 import (
@@ -102,25 +102,25 @@ func Default() *Config {
 // DefaultDataDir follows XDG.
 func DefaultDataDir() string {
 	if d := os.Getenv("XDG_DATA_HOME"); d != "" {
-		return filepath.Join(d, "dsearch")
+		return filepath.Join(d, "loci")
 	}
 	home, err := os.UserHomeDir()
 	if err != nil {
-		return ".dsearch-data"
+		return ".loci-data"
 	}
-	return filepath.Join(home, ".local", "share", "dsearch")
+	return filepath.Join(home, ".local", "share", "loci")
 }
 
 // DefaultConfigDir returns the directory holding config.toml.
 func DefaultConfigDir() string {
 	if d := os.Getenv("XDG_CONFIG_HOME"); d != "" {
-		return filepath.Join(d, "dsearch")
+		return filepath.Join(d, "loci")
 	}
 	home, err := os.UserHomeDir()
 	if err != nil {
-		return ".dsearch"
+		return ".loci"
 	}
-	return filepath.Join(home, ".config", "dsearch")
+	return filepath.Join(home, ".config", "loci")
 }
 
 // DefaultConfigPath is the config.toml location.
@@ -130,7 +130,7 @@ func DefaultConfigPath() string { return filepath.Join(DefaultConfigDir(), "conf
 func (c *Config) ProfileDir() string { return filepath.Join(c.DataDir, "profile") }
 
 // DBPath is the sqlite file location.
-func (c *Config) DBPath() string { return filepath.Join(c.DataDir, "dsearch.db") }
+func (c *Config) DBPath() string { return filepath.Join(c.DataDir, "loci.db") }
 
 // Load resolves configuration: defaults, then optional TOML file, then env overrides.
 func Load(path string) (*Config, error) {
@@ -184,25 +184,25 @@ func (c *Config) Validate() error {
 }
 
 func (c *Config) applyEnv() {
-	if v := os.Getenv("DSEARCH_DATA_DIR"); v != "" {
+	if v := os.Getenv("LOCI_DATA_DIR"); v != "" {
 		c.DataDir = v
 	}
-	if v := os.Getenv("DSEARCH_BROWSER"); v != "" {
+	if v := os.Getenv("LOCI_BROWSER"); v != "" {
 		c.Browser.Mode = v
 	}
-	if v := os.Getenv("DSEARCH_IGNORE_ROBOTS"); v != "" {
+	if v := os.Getenv("LOCI_IGNORE_ROBOTS"); v != "" {
 		c.HTTP.IgnoreRobots = truthy(v)
 	}
-	if v := os.Getenv("DSEARCH_EMBED_BACKEND"); v != "" {
+	if v := os.Getenv("LOCI_EMBED_BACKEND"); v != "" {
 		c.Embed.Backend = v
 	}
-	if v := os.Getenv("DSEARCH_EMBED_MODEL"); v != "" {
+	if v := os.Getenv("LOCI_EMBED_MODEL"); v != "" {
 		c.Embed.Model = v
 	}
-	if v := os.Getenv("DSEARCH_EMBED_URL"); v != "" {
+	if v := os.Getenv("LOCI_EMBED_URL"); v != "" {
 		c.Embed.URL = v
 	}
-	if v := os.Getenv("DSEARCH_SEARX_URLS"); v != "" {
+	if v := os.Getenv("LOCI_SEARX_URLS"); v != "" {
 		c.Search.SearxURLs = splitComma(v)
 	}
 }

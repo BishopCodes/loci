@@ -1,4 +1,4 @@
-# dsearch
+# loci
 
 Key-free web search, clean content extraction, and **local hybrid retrieval** in one Go binary — with prompt-injection defenses in the data path, not in a disclaimer.
 
@@ -17,26 +17,26 @@ Key-free web search, clean content extraction, and **local hybrid retrieval** in
 
 ## Why
 
-Search providers want money per query. Most of the "internet" is already reachable with an HTTP GET, and the rest yields to a real browser. dsearch scrapes the public result pages directly (HTTP first, headless Chromium on bot walls, an opt-in *solve mode* where a visible browser waits for you to solve a captcha), extracts just the document — scripts and CSS are stripped, asset routes are blocked outright — and stores everything in a local index you can ask questions of, with no cloud round trip.
+Search providers want money per query. Most of the "internet" is already reachable with an HTTP GET, and the rest yields to a real browser. loci scrapes the public result pages directly (HTTP first, headless Chromium on bot walls, an opt-in *solve mode* where a visible browser waits for you to solve a captcha), extracts just the document — scripts and CSS are stripped, asset routes are blocked outright — and stores everything in a local index you can ask questions of, with no cloud round trip.
 
 The indexing model follows the pattern [trailhq/Graft](https://github.com/trailhq/Graft) uses for codebases, applied to web content: content-hash keyed incremental ingestion, boundary-aware chunking, and hybrid keyword+semantic retrieval served over MCP.
 
 ## Quick start
 
 ```sh
-make build                      # → bin/dsearch
-./bin/dsearch doctor            # check store/browser/embedder/pdf tooling
-./bin/dsearch search "golang mcp sdk"
-./bin/dsearch index https://example.com/a-post
-./bin/dsearch query "what did the post say about X"
+make build                      # → bin/loci
+./bin/loci doctor            # check store/browser/embedder/pdf tooling
+./bin/loci search "golang mcp sdk"
+./bin/loci index https://example.com/a-post
+./bin/loci query "what did the post say about X"
 
 # true-local embeddings (optional, recommended):
 ollama pull nomic-embed-text
-dsearch config   # then set embed.backend = "ollama" in the printed path
-dsearch reindex --vectors       # re-embed already-stored chunks
+loci config   # then set embed.backend = "ollama" in the printed path
+loci reindex --vectors       # re-embed already-stored chunks
 
 # first-time browser layer (driver download; browsers reused from ~/.cache):
-dsearch browser install
+loci browser install
 ```
 
 ### MCP wiring (Claude Code / Cursor / any MCP host)
@@ -44,7 +44,7 @@ dsearch browser install
 ```json
 {
   "mcpServers": {
-    "dsearch": { "command": "/absolute/path/to/bin/dsearch", "args": ["serve"] }
+    "loci": { "command": "/absolute/path/to/bin/loci", "args": ["serve"] }
   }
 }
 ```
@@ -53,10 +53,10 @@ Tools: `web_search`, `web_fetch`, `web_index`, `web_query`, `web_status`.
 
 ## Security model (read this)
 
-Web pages are adversarial input. dsearch assumes anything a page says may be a
+Web pages are adversarial input. loci assumes anything a page says may be a
 prompt-injection attempt aimed at the *agent* that eventually reads it.
 
-1. **Structural quarantine.** All web content exits dsearch inside a per-call salted
+1. **Structural quarantine.** All web content exits loci inside a per-call salted
    `<untrusted-<random> source="…" fetched="…" sha256="…">` envelope, mirrored in
    typed structured output with `suspicion` metadata. The envelope tags found inside
    content are neutralized first, so a page cannot forge a closing tag and escape.
@@ -74,7 +74,7 @@ prompt-injection attempt aimed at the *agent* that eventually reads it.
 6. **Browser discipline.** Assets (script/CSS/image/font) blocked by default;
    per-context isolation; downloads off; captchas are only solved by *you* in
    `solve` mode against a persistent profile — no captcha circumvention services.
-7. **No interpreter authority.** dsearch itself never runs an LLM on fetched text;
+7. **No interpreter authority.** loci itself never runs an LLM on fetched text;
    retrieval and interpretation stay separated by design.
 
 Residual risk: envelope discipline depends on the host agent honoring it. That's
@@ -106,7 +106,7 @@ why the server `instructions`, tool descriptions, and every warning line restate
 | `serve` | MCP server on stdio |
 | `browser install` | first-time playwright driver setup |
 
-Config: `$XDG_CONFIG_HOME/dsearch/config.toml` (see `config.example.toml`), env overrides `DSEARCH_BROWSER`, `DSEARCH_DATA_DIR`, `DSEARCH_EMBED_*`, `DSEARCH_SEARX_URLS`, `DSEARCH_IGNORE_ROBOTS`.
+Config: `$XDG_CONFIG_HOME/loci/config.toml` (see `config.example.toml`), env overrides `LOCI_BROWSER`, `LOCI_DATA_DIR`, `LOCI_EMBED_*`, `LOCI_SEARX_URLS`, `LOCI_IGNORE_ROBOTS`.
 
 ## Known limits / roadmap
 

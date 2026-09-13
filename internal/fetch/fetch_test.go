@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"dsearch/internal/config"
+	"loci/internal/config"
 )
 
 func testCfg() *config.Config {

@@ -17,8 +17,8 @@ import (
 	"strings"
 	"time"
 
-	"dsearch/internal/browser"
-	"dsearch/internal/config"
+	"loci/internal/browser"
+	"loci/internal/config"
 )
 
 // Doc types recognized by the pipeline.

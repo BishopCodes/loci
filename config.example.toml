@@ -1,5 +1,5 @@
-# dsearch configuration — copy to $XDG_CONFIG_HOME/dsearch/config.toml
-data_dir = ""                      # default: $XDG_DATA_HOME/dsearch
+# loci configuration — copy to $XDG_CONFIG_HOME/loci/config.toml
+data_dir = ""                      # default: $XDG_DATA_HOME/loci
 
 [http]
 user_agent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"

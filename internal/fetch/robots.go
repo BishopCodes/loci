@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"dsearch/internal/config"
+	"loci/internal/config"
 	"golang.org/x/net/publicsuffix"
 )
 

@@ -1,4 +1,4 @@
-// dsearch: key-free web search, fetch and local hybrid search — CLI + MCP server.
+// loci: key-free web search, fetch and local hybrid search — CLI + MCP server.
 package main
 
 import (
@@ -16,12 +16,12 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"dsearch/internal/browser"
-	"dsearch/internal/config"
-	"dsearch/internal/embed"
-	"dsearch/internal/mcpserver"
-	"dsearch/internal/sanitize"
-	"dsearch/internal/service"
+	"loci/internal/browser"
+	"loci/internal/config"
+	"loci/internal/embed"
+	"loci/internal/mcpserver"
+	"loci/internal/sanitize"
+	"loci/internal/service"
 )
 
 var (
@@ -33,9 +33,9 @@ var (
 
 func main() {
 	root := &cobra.Command{
-		Use:   "dsearch",
+		Use:   "loci",
 		Short: "Key-free web search, fetch and local hybrid retrieval",
-		Long: "dsearch searches the web without API keys (scraped providers with browser escalation),\n" +
+		Long: "loci searches the web without API keys (scraped providers with browser escalation),\n" +
 			"extracts clean text/Markdown from pages and PDFs, indexes it locally with\n" +
 			"BM25+vector hybrid search, and serves it over MCP. All fetched content is\n" +
 			"treated as untrusted data: envelope-wrapped and injection-scanned.",
@@ -45,7 +45,7 @@ func main() {
 			initLogger()
 		},
 	}
-	root.PersistentFlags().StringVar(&flagConfig, "config", "", "config file (default $XDG_CONFIG_HOME/dsearch/config.toml)")
+	root.PersistentFlags().StringVar(&flagConfig, "config", "", "config file (default $XDG_CONFIG_HOME/loci/config.toml)")
 	root.PersistentFlags().BoolVar(&flagJSON, "json", false, "machine-readable JSON output")
 	root.PersistentFlags().BoolVarP(&flagVerbose, "verbose", "v", false, "verbose logging")
 	root.PersistentFlags().StringVar(&flagBrowser, "browser", "", "override browser mode: auto|force|off|solve")
@@ -424,7 +424,7 @@ func doctorCmd() *cobra.Command {
 				p := browser.NewPlaywright(cfg, slog.Default())
 				br["available"] = p.Available()
 				if !br["available"].(bool) {
-					br["hint"] = "run: dsearch browser install"
+					br["hint"] = "run: loci browser install"
 				}
 			}
 			report["browser"] = br
@@ -458,7 +458,7 @@ func serveCmd() *cobra.Command {
 				return err
 			}
 			defer svc.Close()
-			slog.Info("dsearch mcp server started", "tools", 5)
+			slog.Info("loci mcp server started", "tools", 5)
 			return mcpserver.New(svc).Run(cmd.Context())
 		},
 	}
