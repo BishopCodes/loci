@@ -1,0 +1,4 @@
+bin/
+.smoke/
+.probe/
+*.db

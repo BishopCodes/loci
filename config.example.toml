@@ -1,0 +1,32 @@
+# dsearch configuration — copy to $XDG_CONFIG_HOME/dsearch/config.toml
+data_dir = ""                      # default: $XDG_DATA_HOME/dsearch
+
+[http]
+user_agent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"
+max_bytes = 10485760               # 10 MiB per document
+timeout_seconds = 15
+max_rps = 0.5                      # polite per-domain rate limit
+ignore_robots = false
+allow_private_host = false         # testing escape hatch ONLY (SSRF guard off)
+
+[browser]
+mode = "auto"                      # auto | force | off | solve
+solve_timeout = 120                # seconds you get to solve a captcha in solve mode
+block_assets = true                # abort script/css/image/font routes
+
+[embed]
+backend = "none"                   # none | ollama | openai-compat
+model = "nomic-embed-text"         # ollama pull nomic-embed-text
+url = "http://127.0.0.1:11434"     # or a local llama.cpp/vLLM base for openai-compat
+# api_key = ""                     # openai-compat only
+
+[search]
+provider_order = ["ddg-html", "ddg-lite", "mojeek", "searxng", "ddg-browser", "bing-browser"]
+searx_urls = []                    # e.g. ["https://searx.be"] with format=json enabled
+max_results = 10
+
+[index]
+chunk_runes = 3200
+chunk_overlap = 400
+
+auto_index_on_fetch = false        # web_fetch MCP tool also indexes
