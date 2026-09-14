@@ -133,7 +133,7 @@ func searchCmd() *cobra.Command {
 						fmt.Fprintf(w, "    %s\n", r.Snippet)
 					}
 				}
-				if w2 := sanitize.WarnSuspicion(res.Suspicion, nil); w2 != "" {
+				if w2 := sanitize.WarnSuspicion(res.Suspicion, res.Signals); w2 != "" {
 					fmt.Fprint(w, "\n"+w2)
 				}
 			})
@@ -314,7 +314,7 @@ func queryCmd() *cobra.Command {
 						fmt.Fprintf(w, "   %s\n", line)
 					}
 				}
-				if w2 := sanitize.WarnSuspicion(res.Suspicion, nil); w2 != "" {
+				if w2 := sanitize.WarnSuspicion(res.Suspicion, res.Signals); w2 != "" {
 					fmt.Fprint(w, "\n"+w2)
 				}
 			})

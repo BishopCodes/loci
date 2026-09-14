@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/url"
+	"slices"
 	"sort"
 	"strings"
 	"time"
@@ -78,6 +79,7 @@ type SearchOutcome struct {
 	Provider   string          `json:"provider"`
 	DegradedTo string          `json:"degraded_to,omitempty"`
 	Suspicion  string          `json:"suspicion"`
+	Signals    []string        `json:"signals,omitempty"`
 }
 
 // Search runs the provider chain and sanitizes snippets.
@@ -86,7 +88,7 @@ func (s *Service) Search(ctx context.Context, query string, n int) (*SearchOutco
 	if err != nil {
 		return nil, err
 	}
-	worst := sanitize.SuspicionNone
+	worst := suspicionAccum{level: sanitize.SuspicionNone}
 	for i := range results {
 		t := sanitize.Text(results[i].Title)
 		sn := sanitize.Text(results[i].Snippet)
@@ -94,11 +96,9 @@ func (s *Service) Search(ctx context.Context, query string, n int) (*SearchOutco
 		results[i].Snippet = sanitize.DefangURLs(cleanOneLine(sn.Text))
 		// Score the joined text: some signals match across the title/snippet
 		// boundary, and per-field scoring would under-report them.
-		if lvl, _ := sanitize.Detect(t.Text + "\n" + sn.Text); rank(lvl) > rank(worst) {
-			worst = lvl
-		}
+		worst.add(sanitize.Detect(t.Text + "\n" + sn.Text))
 	}
-	return &SearchOutcome{Results: results, Provider: provider, Suspicion: worst}, nil
+	return &SearchOutcome{Results: results, Provider: provider, Suspicion: worst.level, Signals: worst.signals}, nil
 }
 
 // ---------------------------------------------------------------------------
@@ -276,6 +276,7 @@ type QueryOutcome struct {
 	Chunks    []store.Hit `json:"chunks"`
 	Mode      string      `json:"mode"` // hybrid | keyword-only
 	Suspicion string      `json:"suspicion"`
+	Signals   []string    `json:"signals,omitempty"`
 }
 
 // Query runs hybrid retrieval, wrapping each chunk in the untrusted envelope.
@@ -309,17 +310,15 @@ func (s *Service) Query(ctx context.Context, q string, k int) (*QueryOutcome, er
 	for _, h := range full {
 		byID[h.ChunkID] = h
 	}
-	worst := sanitize.SuspicionNone
+	worst := suspicionAccum{level: sanitize.SuspicionNone}
 	for i := range hits {
 		src := byID[hits[i].ChunkID]
 		hits[i].Text = sanitize.Envelope(sanitize.CleanUnicode(src.Text), src.URL)
 		hits[i].URL, hits[i].Title, hits[i].DocType = src.URL, src.Title, src.DocType
 		hits[i].FetchedAt, hits[i].SHA = src.FetchedAt, src.SHA
-		if lvl, _ := sanitize.Detect(src.Text); rank(lvl) > rank(worst) {
-			worst = lvl
-		}
+		worst.add(sanitize.Detect(src.Text))
 	}
-	return &QueryOutcome{Chunks: hits, Mode: mode, Suspicion: worst}, nil
+	return &QueryOutcome{Chunks: hits, Mode: mode, Suspicion: worst.level, Signals: worst.signals}, nil
 }
 
 func ids(hits []store.Hit) []int64 {
@@ -456,6 +455,29 @@ func hashBytes(b []byte) string {
 }
 
 func now() string { return time.Now().UTC().Format(time.RFC3339) }
+
+// suspicionAccum folds many detections into the one level to report, plus the
+// signal names that earned it: a higher level replaces the list, an equal level
+// merges into it. Without the list, WarnSuspicion prints "(high): ." and the
+// reader loses which rules fired.
+type suspicionAccum struct {
+	level   string
+	signals []string
+}
+
+func (a *suspicionAccum) add(level string, hits []string) {
+	if rank(level) > rank(a.level) {
+		a.level, a.signals = level, nil
+	}
+	if rank(level) != rank(a.level) {
+		return
+	}
+	for _, h := range hits {
+		if !slices.Contains(a.signals, h) {
+			a.signals = append(a.signals, h)
+		}
+	}
+}
 
 func rank(level string) int {
 	switch level {

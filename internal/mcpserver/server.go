@@ -94,7 +94,7 @@ func (s *Server) register() {
 		if err != nil {
 			return nil, searchOut{}, err
 		}
-		out := searchOut{Provider: res.Provider, Suspicion: res.Suspicion, Warning: sanitize.WarnSuspicion(res.Suspicion, nil)}
+		out := searchOut{Provider: res.Provider, Suspicion: res.Suspicion, Warning: sanitize.WarnSuspicion(res.Suspicion, res.Signals)}
 		for _, r := range res.Results {
 			out.Results = append(out.Results, searchResultOut{Title: untrusted(r.Title, r.URL), URL: r.URL, Snippet: untrusted(r.Snippet, r.URL), Provider: r.Provider, Rank: r.Rank})
 		}
@@ -144,7 +144,7 @@ func (s *Server) register() {
 		if err != nil {
 			return nil, queryOut{}, err
 		}
-		out := queryOut{Mode: res.Mode, Suspicion: res.Suspicion, Warning: sanitize.WarnSuspicion(res.Suspicion, nil)}
+		out := queryOut{Mode: res.Mode, Suspicion: res.Suspicion, Warning: sanitize.WarnSuspicion(res.Suspicion, res.Signals)}
 		for _, h := range res.Chunks {
 			out.Chunks = append(out.Chunks, chunkOut{
 				Text: h.Text, URL: h.URL, Title: h.Title, DocType: h.DocType,
