@@ -15,7 +15,7 @@ Key-free web search, clean content extraction, and **local hybrid retrieval** in
  ┌─ MCP server ───────┐   ├─ extract: HTML→readability→Markdown, PDF, MD  │
  │ web_search  web_   │   ├─ sanitize: unicode hygiene, injection         │
  │ fetch  index query │   │   detector, URL defang, untrusted envelope    │
- │ web_status         │   ├─ store: SQLite — FTS5(BM25) + float32 cosine  │
+ │ web_status  crawl  │   ├─ store: SQLite — FTS5(BM25) + float32 cosine  │
  └────────────────────┘   │   vectors, RRF fusion, content-hash incremental│
                           └──────────────────────────────────────────────┘
 ```
@@ -55,7 +55,7 @@ loci browser install
 }
 ```
 
-Tools: `web_search`, `web_fetch`, `web_index`, `web_query`, `web_status`.
+Tools: `web_search`, `web_fetch`, `web_index`, `web_crawl`, `web_query`, `web_status`.
 
 ## Security model (read this)
 
@@ -68,7 +68,8 @@ prompt-injection attempt aimed at the *agent* that eventually reads it.
    mirrored in typed structured output with `suspicion` metadata (`web_fetch` exposes `fetched_at`
    and `sha256` as typed fields, not envelope attributes). The CLI prints the same text
    un-enveloped, prefixed with the detector warning when content is flagged — except `loci query`,
-   which prints the stored envelope cut to a 600-rune preview. Envelope tags found inside content
+   which prints the stored envelope cut to a 600-rune preview (`web_crawl` returns counters, never
+   page text — what it stores surfaces through `web_query`). Envelope tags found inside content
    are neutralized first, so a page cannot forge a closing tag and escape.
 2. **Unicode hygiene.** NFKC normalization; zero-width, bidi-control and tag
    characters removed; control chars stripped.

@@ -477,7 +477,7 @@ func serveCmd() *cobra.Command {
 				return err
 			}
 			defer svc.Close()
-			slog.Info("loci mcp server started", "tools", 5)
+			slog.Info("loci mcp server started", "data_dir", svc.Cfg.DataDir)
 			return mcpserver.New(svc).Run(cmd.Context())
 		},
 	}
