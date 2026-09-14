@@ -144,8 +144,23 @@ func searchCmd() *cobra.Command {
 	return cmd
 }
 
+// browserMode maps a --browser flag value to a config browser mode. The bool
+// spellings are exactly the ones strconv.ParseBool accepts, so values written for
+// the earlier bool flag keep working: truthy forces the browser, falsy means no
+// override. Anything else is taken as a mode and validated downstream.
+func browserMode(v string) string {
+	switch v {
+	case "", "false", "False", "FALSE", "f", "F", "0":
+		return ""
+	case "true", "True", "TRUE", "t", "T", "1":
+		return config.BrowserForce
+	}
+	return v
+}
+
 func fetchCmd() *cobra.Command {
-	var save, forceBrowser bool
+	var save bool
+	var browser string
 	cmd := &cobra.Command{
 		Use:   "fetch <url>",
 		Short: "Fetch and extract a URL as Markdown (or raw text)",
@@ -155,8 +170,11 @@ func fetchCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			if forceBrowser && cfg.Browser.Mode == config.BrowserAuto {
-				cfg.Browser.Mode = config.BrowserForce
+			if mode := browserMode(browser); mode != "" {
+				cfg.Browser.Mode = mode
+				if err := cfg.Validate(); err != nil {
+					return err
+				}
 			}
 			svc, err := service.New(cfg, slog.Default())
 			if err != nil {
@@ -180,7 +198,8 @@ func fetchCmd() *cobra.Command {
 		},
 	}
 	cmd.Flags().BoolVar(&save, "save", false, "also store the document in the local index")
-	cmd.Flags().BoolVar(&forceBrowser, "browser", false, "force the browser path for this fetch")
+	cmd.Flags().StringVar(&browser, "browser", "", "browser mode for this fetch: bare --browser forces it, or --browser=auto|force|off|solve")
+	cmd.Flags().Lookup("browser").NoOptDefVal = "true"
 	return cmd
 }
 
