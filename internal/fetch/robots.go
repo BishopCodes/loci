@@ -9,8 +9,8 @@ import (
 	"sync"
 	"time"
 
-	"loci/internal/config"
 	"golang.org/x/net/publicsuffix"
+	"loci/internal/config"
 )
 
 // robotsCache caches robots.txt per registrable domain with a 1h TTL.
