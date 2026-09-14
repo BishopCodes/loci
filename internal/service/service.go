@@ -88,11 +88,14 @@ func (s *Service) Search(ctx context.Context, query string, n int) (*SearchOutco
 	}
 	worst := sanitize.SuspicionNone
 	for i := range results {
-		res := sanitize.Text(results[i].Title + "\n" + results[i].Snippet)
-		results[i].Title = sanitize.DefangURLs(cleanOneLine(res.Text))
-		results[i].Snippet = sanitize.DefangURLs(cleanOneLine(res.Text))
-		if rank(res.Suspicion) > rank(worst) {
-			worst = res.Suspicion
+		t := sanitize.Text(results[i].Title)
+		sn := sanitize.Text(results[i].Snippet)
+		results[i].Title = sanitize.DefangURLs(cleanOneLine(t.Text))
+		results[i].Snippet = sanitize.DefangURLs(cleanOneLine(sn.Text))
+		// Score the joined text: some signals match across the title/snippet
+		// boundary, and per-field scoring would under-report them.
+		if lvl, _ := sanitize.Detect(t.Text + "\n" + sn.Text); rank(lvl) > rank(worst) {
+			worst = lvl
 		}
 	}
 	return &SearchOutcome{Results: results, Provider: provider, Suspicion: worst}, nil
@@ -289,7 +292,7 @@ func (s *Service) Query(ctx context.Context, q string, k int) (*QueryOutcome, er
 	if s.Embedder != nil {
 		vecs, err := s.Embedder.Embed(ctx, []string{q})
 		if err != nil {
-			return nil, fmt.Errorf("query embedding failed (store still searchable via keywords with --no-embed): %w", err)
+			return nil, fmt.Errorf("query embedding failed (set embed.backend = \"none\" to stay keyword-only): %w", err)
 		}
 		vectorIDs, err = s.Store.VectorSearch(ctx, vecs[0], 50)
 		if err != nil {
