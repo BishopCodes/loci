@@ -25,6 +25,7 @@ The indexing model follows the pattern [trailhq/Graft](https://github.com/trailh
 
 ```sh
 make build                      # → bin/loci
+make install                    # → ~/.local/bin/loci; needed for the bare `loci …` below (PREFIX= / DESTDIR= to relocate)
 ./bin/loci doctor            # check store/browser/embedder/pdf tooling
 ./bin/loci search "golang mcp sdk"
 ./bin/loci index https://example.com/a-post
@@ -56,16 +57,21 @@ Tools: `web_search`, `web_fetch`, `web_index`, `web_query`, `web_status`.
 Web pages are adversarial input. loci assumes anything a page says may be a
 prompt-injection attempt aimed at the *agent* that eventually reads it.
 
-1. **Structural quarantine.** All web content exits loci inside a per-call salted
-   `<untrusted-<random> source="…" fetched="…" sha256="…">` envelope, mirrored in
-   typed structured output with `suspicion` metadata. The envelope tags found inside
-   content are neutralized first, so a page cannot forge a closing tag and escape.
+1. **Structural quarantine.** Page text reaches an agent inside a per-call salted
+   `<untrusted-<random-hex> source="URL">` envelope: `web_fetch` wraps the extracted document,
+   `web_query` wraps each stored hit, `web_search` wraps each result title and snippet, all
+   mirrored in typed structured output with `suspicion` metadata (`web_fetch` exposes `fetched_at`
+   and `sha256` as typed fields, not envelope attributes). The CLI prints the same text
+   un-enveloped, prefixed with the detector warning when content is flagged — except `loci query`,
+   which prints the stored envelope cut to a 600-rune preview. Envelope tags found inside content
+   are neutralized first, so a page cannot forge a closing tag and escape.
 2. **Unicode hygiene.** NFKC normalization; zero-width, bidi-control and tag
    characters removed; control chars stripped.
 3. **Detection, never deletion.** A weighted rule set (instruction overrides,
    fake role lines/tags, chat-template tokens, exfil phrasing, credential strings…)
    attaches `suspicion=none|low|medium|high` + signal names. Content is never
-   silently modified beyond step 2.
+   silently modified beyond step 2, except that envelope content is capped at 600 KB
+   and marked `[…truncated]`.
 4. **URL defanging.** URLs inside search snippets arrive as `hxxps://host[.]path` so
    agents don't reflexively fetch planted links; real URLs stay in provenance fields.
 5. **SSRF guard.** Only `http(s)`, no URL credentials, ≤5 redirects each re-validated,
@@ -97,7 +103,7 @@ why the server `instructions`, tool descriptions, and every warning line restate
 | command | purpose |
 |---|---|
 | `search <q> [-n N] [--json]` | provider-chain web search |
-| `fetch <url> [--save] [--browser]` | extract to Markdown (envelope-wrapped) |
+| `fetch <url> [--save] [--browser[=auto|force|off|solve]]` (value uses `=`, not a space) | extract to Markdown — raw text on the CLI, envelope-wrapped by `web_fetch` |
 | `index <url>… \| --from-file urls.txt` | incremental indexing |
 | `crawl <seed> [--max N] [--same-domain]` | polite BFS crawl + index |
 | `query <q> [-k N]` | hybrid retrieval over the store |
@@ -105,6 +111,7 @@ why the server `instructions`, tool descriptions, and every warning line restate
 | `doctor` | capability report (store, ollama/models, browser, pdftotext) |
 | `serve` | MCP server on stdio |
 | `browser install` | first-time playwright driver setup |
+| `config` | effective configuration as JSON + the `config.toml` path in use |
 
 Config: `$XDG_CONFIG_HOME/loci/config.toml` (see `config.example.toml`), env overrides `LOCI_BROWSER`, `LOCI_DATA_DIR`, `LOCI_EMBED_*`, `LOCI_SEARX_URLS`, `LOCI_IGNORE_ROBOTS`.
 
@@ -115,6 +122,7 @@ Config: `$XDG_CONFIG_HOME/loci/config.toml` (see `config.example.toml`), env ove
 - Brute-force vectors until ~100k chunks; then consider sqlite-vec.
 - `crawl` is BFS with a link budget; no sitemap/RSS-aware crawling yet.
 - Captcha policy: human-in-the-loop only.
+- The `dsearch` → `loci` rename does not migrate data/config dirs or `DSEARCH_*` env vars; an index from the old build is ignored, so re-run `index`/`crawl`.
 
 ## Development
 
