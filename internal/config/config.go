@@ -171,6 +171,11 @@ func (c *Config) Validate() error {
 	if c.Embed.Backend != EmbedNone && c.Embed.Model == "" {
 		return errors.New("embed.model required when an embedding backend is configured")
 	}
+	if c.DataDir == "" {
+		// An explicit `data_dir = ""` in config.toml decodes over the default;
+		// without this the store would land in the process CWD.
+		c.DataDir = DefaultDataDir()
+	}
 	if c.HTTP.MaxBytes <= 0 {
 		c.HTTP.MaxBytes = 10 << 20
 	}
