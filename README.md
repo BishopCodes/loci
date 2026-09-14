@@ -2,6 +2,11 @@
 
 Key-free web search, clean content extraction, and **local hybrid retrieval** in one Go binary — with prompt-injection defenses in the data path, not in a disclaimer.
 
+> **Proof of concept, very early days.** Scraped providers break without notice, the
+> injection defenses are best-effort and can be bypassed, and the on-disk index format may
+> change without a migration path. Use with caution — this is not a dependency to put in
+> front of anything you rely on.
+
 ```
  ┌─ CLI ──────────────┐   ┌──────────────────────────────────────────────┐
  │ search fetch index │   │ search: DDG/Mojeek/SearXNG chain (HTTP-first, │
